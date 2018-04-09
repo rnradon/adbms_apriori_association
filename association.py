@@ -43,7 +43,7 @@ print("\n\n-----------Total profit earned by the company: -----------")
 print(sum(dataset['TotalAmount']))
 
 
-#Ques Top 20 customers based on the 
+#Ques Top 20 customers based on the company
 customers_amounts = dataset.groupby('CustomerID')['TotalAmount'].agg(np.sum).sort_values(ascending=False)
 print("\n\n-----------Top 20 customers based on the shopping amount that they spent: -----------")
 print(customers_amounts.head(20))
