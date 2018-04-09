@@ -1,0 +1,71 @@
+import pandas as pd
+import numpy as np
+from mlxtend.frequent_patterns import apriori
+from mlxtend.frequent_patterns import association_rules
+import matplotlib.pyplot as plt
+
+#import the file on which association rules are to be applied
+# df = pd.read_excel('http://archive.ics.uci.edu/ml/machine-learning-databases/00352/Online%20Retail.xlsx')
+dataset = pd.read_excel('online_retail_data.xlsx')
+print(dataset.head())
+
+
+
+# Preprocessing of dataset - 
+
+# remove unnecessary spaces from description
+# remove unull invoice numbers
+# remove 'C' from invoice number (invoice numbers with credit)
+dataset['Description'] = dataset['Description'].str.strip()
+dataset.dropna(axis=0, subset=['InvoiceNo'], inplace=True)
+dataset['InvoiceNo'] = dataset['InvoiceNo'].astype('str')
+dataset = dataset[~dataset['InvoiceNo'].str.contains('C')]
+
+# Add extra fields 
+dataset['TotalAmount'] = dataset['Quantity'] * dataset['UnitPrice']
+dataset['InvoiceYear'] = dataset['InvoiceDate'].dt.year
+dataset['InvoiceMonth'] = dataset['InvoiceDate'].dt.month
+dataset['InvoiceYearMonth'] = dataset['InvoiceYear'].map(str) + "-" + dataset['InvoiceMonth'].map(str)
+
+print(dataset.head())
+
+#basic computations on dataset
+print(dataset.describe())
+
+
+#Ques Total number of sales incurred by the company
+print("\n\n-----------Total number of sales incurred by the company: -----------")
+print(len(dataset['InvoiceNo'].unique()))
+
+
+#Ques Total profit earned by the company
+print("\n\n-----------Total profit earned by the company: -----------")
+print(sum(dataset['TotalAmount']))
+
+
+#Ques Top 20 customers based on the 
+customers_amounts = dataset.groupby('CustomerID')['TotalAmount'].agg(np.sum).sort_values(ascending=False)
+print("\n\n-----------Top 20 customers based on the shopping amount that they spent: -----------")
+print(customers_amounts.head(20))
+
+customers_amounts.head(20).plot.bar()
+plt.show()
+
+
+#Ques Frequently sold items by quantitiy
+gp_stockcode = dataset.groupby('Description')
+gp_stockcode_frq_quantitiy = gp_stockcode['Quantity'].agg(np.sum).sort_values(ascending=False)
+print("\n\n-----------Frequently sold items by quantitiy: -----------")
+print(gp_stockcode_frq_quantitiy.head(20))
+
+gp_stockcode_frq_quantitiy.head(20).plot.bar()
+plt.show()
+
+
+#Ques Frequently sold items by total amount
+gp_stockcode_frq_amount = gp_stockcode['TotalAmount'].agg(np.sum).sort_values(ascending=False)
+print("\n\n-----------Frequently sold items by total amount: -----------")
+gp_stockcode_frq_amount.head(20)
+
+gp_stockcode_frq_amount.head(20).plot.bar()
+plt.show()
