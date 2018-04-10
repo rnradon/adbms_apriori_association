@@ -134,6 +134,60 @@ plt.show()
 #----------------------APRIORI------------------------
 
 
+#FRANCE
+#consolidate the items into 1 transaction per row with each product 1 hot encoded: convert each category value into a new column and assigns a 1 or 0 (True/False)
+
+basket_france = (dataset[dataset['Country'] =="France"]
+                 .groupby(['InvoiceNo', 'Description'])['Quantity']
+                 .sum().unstack().reset_index().fillna(0)
+                 .set_index('InvoiceNo'))
+print(basket_france.head())
+
+#any positive values are converted to a 1 and anything less the 0 is set to 0
+def encode_units(x):
+    if x <= 0:
+        return 0
+    if x >= 1:
+        return 1
+
+#remove the postage column
+basket_france_sets = basket_france.applymap(encode_units)
+basket_france_sets.drop('POSTAGE', inplace=True, axis=1)
+
+#frequent item sets that have a support of at least 7%
+frequent_itemsets_france = apriori(basket_france_sets, min_support=0.07, use_colnames=True)
+
+#generate the rules with their corresponding support, confidence and lift
+rules_france = association_rules(frequent_itemsets_france, metric="lift", min_threshold=1)
+print(rules_france.head())
+
+
+
+#----------------------CONCLUSION------------------------
+
+#filtering the dataframe with large lift (6) and high confidence (.8):
+print(rules_france[ (rules_france['lift'] >= 6) &
+      (rules_france['confidence'] >= 0.8) ])
+
+#how much opportunity there is to use the popularity of one product to drive sales of another
+#(we can see that we sell 340 Green Alarm clocks but only 316 Red Alarm Clocks so maybe we can drive more Red Alarm Clock sales through recommendations)
+print(basket_france['ALARM CLOCK BAKELIKE GREEN'].sum())
+print(basket_france['ALARM CLOCK BAKELIKE RED'].sum())
+
+#GERMANY
+basket_germany = (dataset[dataset['Country'] =="Germany"]
+           .groupby(['InvoiceNo', 'Description'])['Quantity']
+           .sum().unstack().reset_index().fillna(0)
+           .set_index('InvoiceNo'))
+
+basket_germany_sets = basket_germany.applymap(encode_units)
+basket_germany_sets.drop('POSTAGE', inplace=True, axis=1)
+
+frequent_itemsets_germany = apriori(basket_germany_sets, min_support=0.05, use_colnames=True)
+rules_germany = association_rules(frequent_itemsets_germany, metric="lift", min_threshold=1)
+
+print(rules_germany[ (rules_germany['lift'] >= 4) &
+       (rules_germany['confidence'] >= 0.5)])
 
 
 
