@@ -17,3 +17,10 @@ List of questions :
 10. Get United Kingdom top ranked customers based on the total amount.
 11. What are United Kingdom's frequently sold items by quantitiy ?
 12. What are United Kingdom's frequently sold items by total amount ?
+
+KDD Process involved :
+1. Data Selection
+2. Data Pre Processing
+3. Data Transformation
+4. Data Mining Algo (Apriori)
+5. Interpretation of Results
